@@ -17,6 +17,13 @@ The core research, optimization, and benchmarking suite. Formulates commercial a
 - **Simulated Quantum Annealing (D-Wave Neal)**
 - **Gate-Based QAOA (Qiskit 2.x)**
 
+### 🌐 [Interactive Web Visualizer & Radar](./quantum-flight-optimizer/web/index.html)
+A real-time flight corridor radar and solver benchmark visualizer.
+- **Run locally**: Open `quantum-flight-optimizer/web/index.html` in your web browser.
+- **Deploy to GitHub Pages**: In your repository **Settings** > **Pages**:
+  - **Source**: Select `Deploy from a branch` (Branch: `main` or `master`, Folder: `/docs` or `/ (root)`), OR
+  - **Source**: Select `GitHub Actions` (using the included `.github/workflows/deploy-pages.yml`).
+
 ---
 
 ## Quick Start

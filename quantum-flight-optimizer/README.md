@@ -18,6 +18,7 @@ Modeled on the commercial airspace network of the **Indian Subcontinent**, AeroQ
 
 ## Table of Contents
 
+- [Interactive Web Visualizer & GitHub Pages](#interactive-web-visualizer--github-pages)
 - [Key Highlights](#key-highlights)
 - [System Architecture](#system-architecture)
 - [Indian Airspace Network Topology](#indian-airspace-network-topology)
@@ -31,6 +32,29 @@ Modeled on the commercial airspace network of the **Indian Subcontinent**, AeroQ
 - [Module Summaries & Documentation Links](#module-summaries--documentation-links)
 - [Running Tests](#running-tests)
 - [Contributing & License](#contributing--license)
+
+---
+
+## Interactive Web Visualizer & GitHub Pages
+
+AeroQ-Route features a live interactive simulation and radar visualizer built with HTML5 Canvas, modern CSS, and vanilla JavaScript.
+
+### How to Open Locally
+Simply open `web/index.html` (or `docs/index.html`) directly in any web browser, or launch a local server:
+```bash
+# In the project directory:
+python -m http.server 8000 --directory web
+# Open http://localhost:8000 in your browser
+```
+
+### How to Enable on GitHub Pages
+If your website is not opening on GitHub, follow these quick steps in your GitHub repository:
+1. Go to **Settings** > **Pages** in your repository.
+2. Under **Build and deployment** > **Source**, choose either:
+   - **Option A (Instant - Recommended)**: Select **Deploy from a branch**. Choose branch `main` (or `master`) and select the `/docs` folder (or `/ (root)`). Click **Save**.
+   - **Option B (GitHub Actions)**: Select **GitHub Actions**. The included `.github/workflows/deploy-pages.yml` will automatically build and publish the site on push.
+3. Once configured, your site will be live at:
+   `https://<your-username>.github.io/<repository-name>/`
 
 ---
 
