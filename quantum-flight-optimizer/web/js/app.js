@@ -12,19 +12,26 @@ document.addEventListener("DOMContentLoaded", () => {
   let splashProgress = 0;
 
   function advanceSplash() {
-    splashProgress += Math.random() * 18 + 4;
+    splashProgress += Math.random() * 22 + 8;
     if (splashProgress > 100) splashProgress = 100;
     if (progressFill) progressFill.style.width = splashProgress + "%";
 
     if (splashProgress < 100) {
-      setTimeout(advanceSplash, 100 + Math.random() * 120);
+      setTimeout(advanceSplash, 80 + Math.random() * 100);
     } else {
       setTimeout(() => {
         if (splashScreen) splashScreen.classList.add("hidden");
-      }, 300);
+      }, 250);
     }
   }
   advanceSplash();
+
+  // Safety fallback: auto-dismiss splash screen after 2.5 seconds max
+  setTimeout(() => {
+    if (splashScreen && !splashScreen.classList.contains("hidden")) {
+      splashScreen.classList.add("hidden");
+    }
+  }, 2500);
 
   // ========================================================================
   //  PARTICLE CANVAS BACKGROUND
@@ -45,7 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
       particles = [];
       const w = particleCanvas.width;
       const h = particleCanvas.height;
-      const count = Math.floor((w * h) / 12000);
+      const count = Math.min(60, Math.floor((w * h) / 12000));
       for (let i = 0; i < count; i++) {
         particles.push({
           x: Math.random() * w,
@@ -63,7 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const h = particleCanvas.height;
       pctx.clearRect(0, 0, w, h);
 
-      // Draw lines between close particles
+      // Draw subtle connecting lines
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
           const dx = particles[i].x - particles[j].x;
@@ -80,7 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
 
-      // Draw particles
+      // Draw particle dots
       particles.forEach(p => {
         pctx.beginPath();
         pctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
@@ -90,7 +97,7 @@ document.addEventListener("DOMContentLoaded", () => {
         p.x += p.vx;
         p.y += p.vy;
 
-        // Wrap around
+        // Wrap around borders
         if (p.x < 0) p.x = w;
         if (p.x > w) p.x = 0;
         if (p.y < 0) p.y = h;
@@ -120,9 +127,16 @@ document.addEventListener("DOMContentLoaded", () => {
         scrollObserver.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.08, rootMargin: "0px 0px -40px 0px" });
+  }, { threshold: 0.05, rootMargin: "0px 0px -20px 0px" });
 
   scrollElements.forEach(el => scrollObserver.observe(el));
+
+  // Ensure top-of-page hero elements are visible immediately
+  setTimeout(() => {
+    document.querySelectorAll(".hero .animate-on-scroll").forEach(el => {
+      el.classList.add("visible");
+    });
+  }, 400);
 
   // ========================================================================
   //  COUNTER ANIMATION
@@ -132,12 +146,14 @@ document.addEventListener("DOMContentLoaded", () => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         const el = entry.target;
-        const target = parseInt(el.dataset.target);
-        animateCounter(el, 0, target, 1200);
+        const target = parseInt(el.dataset.target, 10);
+        if (!isNaN(target)) {
+          animateCounter(el, 0, target, 1200);
+        }
         counterObserver.unobserve(el);
       }
     });
-  }, { threshold: 0.5 });
+  }, { threshold: 0.15 });
 
   counters.forEach(c => counterObserver.observe(c));
 
@@ -224,6 +240,7 @@ document.addEventListener("DOMContentLoaded", () => {
   //  AIRSPACE RADAR CANVAS
   // ========================================================================
   const canvas = document.getElementById("airspaceCanvas");
+  if (!canvas) return;
   const ctx = canvas.getContext("2d");
 
   // State
@@ -233,6 +250,22 @@ document.addEventListener("DOMContentLoaded", () => {
   let animationFrameId = null;
   let planeProgress = 0;
   let radarSweepAngle = 0;
+
+  // Cached solver solution to prevent heavy re-calculation inside requestAnimationFrame (60 FPS)
+  let currentSolution = null;
+
+  function updateSolution() {
+    if (currentMode === "dijkstra") {
+      currentSolution = window.AeroSimulator.solveDijkstra(flightCount);
+    } else if (currentMode === "ilp") {
+      currentSolution = window.AeroSimulator.solveExactILP(flightCount, capacityLimit);
+    } else if (currentMode === "neal") {
+      currentSolution = window.AeroSimulator.solveAnnealer(flightCount, capacityLimit);
+    } else {
+      currentSolution = window.AeroSimulator.solveQAOA(flightCount, capacityLimit);
+    }
+    updateMetricsDisplay(currentSolution);
+  }
 
   // Coordinate projection bounds for Indian subcontinent
   const LON_MIN = 68.0, LON_MAX = 94.0;
@@ -262,7 +295,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const h = canvas.height / window.devicePixelRatio;
     ctx.clearRect(0, 0, w, h);
 
-    // Subtle radar circles centered on central India (Nagpur)
+    // Radar circles centered on central India (Nagpur)
     const center = project(79.0882, 21.1458);
     ctx.strokeStyle = "rgba(0, 242, 254, 0.06)";
     ctx.lineWidth = 1;
@@ -272,7 +305,7 @@ document.addEventListener("DOMContentLoaded", () => {
       ctx.stroke();
     }
 
-    // Radar sweep line
+    // Rotating Radar sweep line
     const sweepLen = 350;
     const sweepX = center.x + Math.cos(radarSweepAngle) * sweepLen;
     const sweepY = center.y + Math.sin(radarSweepAngle) * sweepLen;
@@ -372,6 +405,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Draw Active Flight Corridors
   function drawRoutes(assignments, edgeUsage) {
+    if (!assignments || !edgeUsage) return;
+
     for (const [fId, path] of Object.entries(assignments)) {
       if (!path || path.length < 2) continue;
 
@@ -433,17 +468,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Animation Loop
+  // Animation Loop (Silky 60 FPS without re-solving on every frame)
   function render() {
     drawRadarBackground();
 
-    let solverResult;
-    if (currentMode === "dijkstra") solverResult = window.AeroSimulator.solveDijkstra(flightCount);
-    else if (currentMode === "ilp") solverResult = window.AeroSimulator.solveExactILP(flightCount, capacityLimit);
-    else if (currentMode === "neal") solverResult = window.AeroSimulator.solveAnnealer(flightCount, capacityLimit);
-    else solverResult = window.AeroSimulator.solveQAOA(flightCount, capacityLimit);
+    if (!currentSolution) {
+      updateSolution();
+    }
 
-    drawRoutes(solverResult.assignments, solverResult.edgeUsage);
+    drawRoutes(currentSolution.assignments, currentSolution.edgeUsage);
     drawNodes();
 
     planeProgress = (planeProgress + 0.0035) % 1.0;
@@ -452,14 +485,30 @@ document.addEventListener("DOMContentLoaded", () => {
   render();
 
   // ========================================================================
-  //  MODE SWITCH BUTTONS
+  //  SOLVER SYNCHRONIZATION FUNCTION
   // ========================================================================
+  function setSolverMode(mode) {
+    currentMode = mode;
+    document.querySelectorAll(".mode-btn").forEach(b => {
+      b.classList.toggle("active", b.dataset.mode === mode);
+    });
+    document.querySelectorAll(".solver-choice-card").forEach(c => {
+      c.classList.toggle("selected", c.dataset.solver === mode);
+    });
+    updateSolution();
+  }
+
+  // Mode Switch Buttons
   document.querySelectorAll(".mode-btn").forEach(btn => {
-    btn.addEventListener("click", (e) => {
-      document.querySelectorAll(".mode-btn").forEach(b => b.classList.remove("active"));
-      e.target.classList.add("active");
-      currentMode = e.target.dataset.mode;
-      updateMetricsDisplay();
+    btn.addEventListener("click", () => {
+      setSolverMode(btn.dataset.mode);
+    });
+  });
+
+  // Solver Choice Cards
+  document.querySelectorAll(".solver-choice-card").forEach(card => {
+    card.addEventListener("click", () => {
+      setSolverMode(card.dataset.solver);
     });
   });
 
@@ -470,9 +519,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const flightsVal = document.getElementById("flightsVal");
   if (flightsSlider) {
     flightsSlider.addEventListener("input", (e) => {
-      flightCount = parseInt(e.target.value);
+      flightCount = parseInt(e.target.value, 10);
       flightsVal.textContent = flightCount;
-      updateMetricsDisplay();
+      updateSolution();
       populateScheduleTable();
     });
   }
@@ -481,29 +530,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const capacityVal = document.getElementById("capacityVal");
   if (capacitySlider) {
     capacitySlider.addEventListener("input", (e) => {
-      capacityLimit = parseInt(e.target.value);
+      capacityLimit = parseInt(e.target.value, 10);
       capacityVal.textContent = capacityLimit;
-      updateMetricsDisplay();
+      updateSolution();
     });
   }
 
   // ========================================================================
-  //  SOLVER CHOICE CARDS
-  // ========================================================================
-  document.querySelectorAll(".solver-choice-card").forEach(card => {
-    card.addEventListener("click", () => {
-      document.querySelectorAll(".solver-choice-card").forEach(c => c.classList.remove("selected"));
-      card.classList.add("selected");
-      currentMode = card.dataset.solver;
-      document.querySelectorAll(".mode-btn").forEach(b => {
-        b.classList.toggle("active", b.dataset.mode === currentMode);
-      });
-      updateMetricsDisplay();
-    });
-  });
-
-  // ========================================================================
-  //  ACTION BUTTON
+  //  ACTION BUTTON (BENCHMARK SUITE)
   // ========================================================================
   const runBtn = document.getElementById("runBenchmarkBtn");
   if (runBtn) {
@@ -523,7 +557,7 @@ document.addEventListener("DOMContentLoaded", () => {
           </svg>
           Benchmark Complete!
         `;
-        updateMetricsDisplay();
+        updateSolution();
         populateBenchmarkTable();
 
         setTimeout(() => {
@@ -534,19 +568,15 @@ document.addEventListener("DOMContentLoaded", () => {
             Run Full Benchmark Suite
           `;
         }, 2000);
-      }, 800);
+      }, 700);
     });
   }
 
   // ========================================================================
   //  UPDATE RESULT CARDS
   // ========================================================================
-  function updateMetricsDisplay() {
-    let res;
-    if (currentMode === "dijkstra") res = window.AeroSimulator.solveDijkstra(flightCount);
-    else if (currentMode === "ilp") res = window.AeroSimulator.solveExactILP(flightCount, capacityLimit);
-    else if (currentMode === "neal") res = window.AeroSimulator.solveAnnealer(flightCount, capacityLimit);
-    else res = window.AeroSimulator.solveQAOA(flightCount, capacityLimit);
+  function updateMetricsDisplay(res) {
+    if (!res) return;
 
     // Animate number changes
     animateValue("resFuel", `${res.totalFuel.toLocaleString()} kg`);
@@ -559,7 +589,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     animateValue("resRuntime", `${(res.runtimeSec * 1000).toFixed(1)} ms`);
-    document.getElementById("activeSolverTitle").textContent = res.solverName;
+    const titleEl = document.getElementById("activeSolverTitle");
+    if (titleEl) {
+      titleEl.textContent = res.solverName;
+    }
   }
 
   function animateValue(elId, newValue) {
@@ -636,13 +669,13 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ========================================================================
-  //  INITIAL POPULATE
+  //  INITIAL POPULATION
   // ========================================================================
-  updateMetricsDisplay();
+  updateSolution();
   populateBenchmarkTable();
   populateScheduleTable();
 
-  // Add CSS animation for table rows
+  // Add CSS animation for table rows and spinners
   const style = document.createElement("style");
   style.textContent = `
     @keyframes fadeInRow {
