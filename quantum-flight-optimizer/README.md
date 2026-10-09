@@ -10,18 +10,24 @@
 
 Modeled on the commercial airspace network of the **Indian Subcontinent**, AeroQ-Route demonstrates how quantum algorithms significantly alleviate airspace bottleneck congestion while preserving fuel efficiency and minimizing carbon emissions ($CO_2$).
 
+<p align="center">
+  <img src="./docs/images/indian_airspace_network.jpg" alt="Indian Airspace Network Overview" width="100%">
+</p>
+
 ---
 
 ## Table of Contents
 
 - [Key Highlights](#key-highlights)
 - [System Architecture](#system-architecture)
+- [Indian Airspace Network Topology](#indian-airspace-network-topology)
 - [Mathematical Formulation](#mathematical-formulation)
 - [Directory Structure](#directory-structure)
 - [Installation & Setup](#installation--setup)
 - [Configuration Guide](#configuration-guide)
 - [Running the Benchmark](#running-the-benchmark)
 - [Benchmark Results](#benchmark-results)
+- [Environmental Sustainability & Carbon Reduction](#environmental-sustainability--carbon-reduction)
 - [Module Summaries & Documentation Links](#module-summaries--documentation-links)
 - [Running Tests](#running-tests)
 - [Contributing & License](#contributing--license)
@@ -46,6 +52,10 @@ Modeled on the commercial airspace network of the **Indian Subcontinent**, AeroQ
 
 ## System Architecture
 
+<p align="center">
+  <img src="./docs/images/system_architecture_diagram.jpg" alt="Clean System Architecture Diagram" width="100%">
+</p>
+
 ```mermaid
 graph TD
     A[config.yaml] --> B[data_gen: Airspace Graph & Flights]
@@ -60,6 +70,16 @@ graph TD
     D4 --> E
     E --> F[Benchmark Comparison Report: Fuel, CO2, Violations, Runtime]
 ```
+
+---
+
+## Indian Airspace Network Topology
+
+The airspace graph incorporates the 7 primary Indian commercial hub airports along with high-altitude transit nodes and airways:
+
+<p align="center">
+  <img src="./docs/images/airports_coordinate_graph.jpg" alt="India 7 Major Airports Airspace Graph" width="90%">
+</p>
 
 ---
 
@@ -243,6 +263,10 @@ Benchmark completed successfully!
 
 ## Benchmark Results
 
+<p align="center">
+  <img src="./docs/images/benchmark_fuel_comparison.jpg" alt="Benchmark Fuel Burn Comparison Across Solvers" width="90%">
+</p>
+
 | Metric | Dijkstra (Greedy) | Exact ILP (PuLP/HiGHS) | Sim Annealer (Neal) | QAOA (Qiskit Gate-Based) |
 | :--- | :---: | :---: | :---: | :---: |
 | **Airspace Violations** | 13 | **4 (-69.2%)** | 7 (-46.2%) | 7 (-46.2%) |
@@ -255,6 +279,16 @@ Benchmark completed successfully!
 1. **The Price of Greedy Routing**: Dijkstra minimizes individual fuel burn in isolation, resulting in massive congestion (13 bottleneck violations) at central hub airways.
 2. **Deconfliction Efficiency**: Both Simulated Annealing and QAOA resolve ~46% of airway bottlenecks in under **0.03 seconds**, finding competitive trajectories within 0.1% of the exact global optimum.
 3. **Execution Speed**: QAOA and Simulated Annealing run orders of magnitude faster than full combinatorial branch-and-bound while achieving high-quality deconfliction.
+
+---
+
+## Environmental Sustainability & Carbon Reduction
+
+AeroQ-Route evaluates flight operations using ICAO standards ($3.16\text{ kg } CO_2\text{ per 1.0 kg Jet-A1 fuel}$), modeling practical fleet savings and tree absorption equivalents:
+
+<p align="center">
+  <img src="./docs/images/co2_reduction_impact.jpg" alt="CO2 Reduction and Green Aviation Impact" width="100%">
+</p>
 
 ---
 

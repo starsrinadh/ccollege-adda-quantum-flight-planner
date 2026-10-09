@@ -49,6 +49,10 @@ Calculates ground truth metrics by traversing each assigned trajectory:
 - Capacity violations: $\sum_{e \in E} \max(0, \text{usage}(e) - \text{capacity}(e))$.
 - Emissions: $\text{fuel} \times 3.16\text{ kg } CO_2\text{ / kg fuel}$ (ICAO standard).
 
+<p align="center">
+  <img src="../docs/images/co2_reduction_impact.jpg" alt="CO2 Emissions Evaluation" width="90%">
+</p>
+
 ---
 
 ## 2. Solver Implementations
@@ -88,6 +92,10 @@ Calculates ground truth metrics by traversing each assigned trajectory:
 ---
 
 ## 3. Comparison Matrix
+
+<p align="center">
+  <img src="../docs/images/benchmark_fuel_comparison.jpg" alt="Fuel Burn Comparison Across Solvers" width="90%">
+</p>
 
 | Solver | Optimality | Capacity Awareness | Quantum Native? | Complexity |
 | :--- | :---: | :---: | :---: | :---: |

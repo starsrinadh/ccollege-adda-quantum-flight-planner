@@ -2,6 +2,10 @@
 
 The `data_gen` package provides realistic graph models of national airspace corridors and commercial flight schedules loosely modeled on the **Indian Subcontinent**.
 
+<p align="center">
+  <img src="../docs/images/indian_airspace_network.jpg" alt="Indian Airspace Network" width="100%">
+</p>
+
 ---
 
 ## File Structure
@@ -21,6 +25,10 @@ data_gen/
 In Air Traffic Management (ATM), national airspace is modeled as an undirected connected graph $G = (V, E)$:
 - **Vertices ($V$)**: Major commercial airports and high-altitude navigational fixes (waypoints) defined by geographical coordinates $(\text{Longitude}, \text{Latitude})$.
 - **Edges ($E$)**: Airway corridors connecting fixes and airports.
+
+<p align="center">
+  <img src="../docs/images/airports_coordinate_graph.jpg" alt="Indian Hub Airports Coordinate Graph" width="90%">
+</p>
 
 ### Key Functions
 

@@ -2,6 +2,10 @@
 
 This workspace contains **AeroQ-Route**, a quantum-assisted aviation emissions and flight trajectory optimization system.
 
+<p align="center">
+  <img src="./quantum-flight-optimizer/docs/images/indian_airspace_network.jpg" alt="AeroQ-Route Indian Airspace Network" width="100%">
+</p>
+
 ---
 
 ## Projects in this Workspace

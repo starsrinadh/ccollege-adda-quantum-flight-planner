@@ -2,6 +2,10 @@
 
 The `models` package contains mathematical optimization models and QUBO (Quadratic Unconstrained Binary Optimization) formulations for trajectory selection, fuel minimization, and conflict avoidance.
 
+<p align="center">
+  <img src="../docs/images/system_architecture_diagram.jpg" alt="Optimization Pipeline Architecture" width="100%">
+</p>
+
 ---
 
 ## File Structure
